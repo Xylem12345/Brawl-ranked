@@ -146,7 +146,62 @@
       text-align: left;
     }
 
-    #netlify-badge { display: none !important; }
+    /* Modal personalizado ultra clean */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      animation: scaleUp 0.15s ease;
+    }
+
+    @keyframes scaleUp {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-text {
+      font-size: 15px;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-cancel { background: #27272a; color: var(--text-muted); }
+    .modal-confirm { background: var(--accent-red); color: white; }
   </style>
 </head>
 <body>
@@ -185,10 +240,21 @@
   <div class="card">
     <h2>Historial de Sesiones</h2>
     <div id="historyList" style="color: var(--text-muted); font-size: 13px; padding: 6px 0;">No hay sesiones guardadas todavía.</div>
-    <button class="btn reset" onclick="clearHistory()" style="margin-top: 8px;">Borrar Historial</button>
+    <button class="btn reset" onclick="confirmClearHistory()" style="margin-top: 8px;">Borrar Historial</button>
   </div>
 
-  <button class="btn reset" onclick="resetCurrent()" style="background: transparent; border: 1px dashed var(--card-border);">Reiniciar Contador Actual</button>
+  <button class="btn reset" onclick="confirmResetCurrent()" style="background: transparent; border: 1px dashed var(--card-border);">Reiniciar Contador Actual</button>
+
+  <!-- Modal Personalizado -->
+  <div id="customModal" class="modal-overlay">
+    <div class="modal-box">
+      <div id="modalText" class="modal-text">¿Estás seguro?</div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-cancel" onclick="closeModal()">Cancelar</button>
+        <button id="modalConfirmBtn" class="modal-btn modal-confirm">Aceptar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     let w = 0, l = 0, pts = 0, streak = 0;
@@ -221,11 +287,25 @@
       update(); 
     }
 
-    function resetCurrent() { 
-      if(confirm("¿Querés reiniciar los números de la sesión actual?")) {
+    function showModal(text, onConfirm) {
+      document.getElementById('modalText').innerText = text;
+      let confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.onclick = function() {
+        onConfirm();
+        closeModal();
+      };
+      document.getElementById('customModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('customModal').style.display = 'none';
+    }
+
+    function confirmResetCurrent() {
+      showModal("¿Querés reiniciar los números de la sesión actual?", function() {
         w = 0; l = 0; pts = 0; streak = 0; 
-        update(); 
-      }
+        update();
+      });
     }
 
     function update() {
@@ -256,7 +336,6 @@
     function saveSession() {
       let total = w + l;
       if (total === 0 && pts === 0) {
-        alert("¡No hay nada para guardar en esta sesión!");
         return;
       }
 
@@ -305,13 +384,12 @@
       listDiv.innerHTML = html;
     }
 
-    function clearHistory() {
-      if(confirm("¿Seguro que querés borrar todo el historial?")) {
+    function confirmClearHistory() {
+      showModal("¿Seguro que querés borrar todo el historial?", function() {
         localStorage.removeItem('brawl_history');
         loadHistory();
-      }
+      });
     }
   </script>
 </body>
-  </html>
-  
+</html>
