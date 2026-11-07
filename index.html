@@ -4,21 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Brawl Stars Ranked Tracker</title>
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
-    %22name%22: %22Brawl Stars Ranked Tracker%22,
-    %22short_name%22: %22Ranked Tracker%22,
-    %22start_url%22: %22.%22,
-    %22display%22: %22standalone%22,
-    %22background_color%22: %22%230d0d0d%22,
-    %22theme_color%22: %22%230d0d0d%22,
-    %22icons%22: [
-      {
-        %22src%22: %22https://cdn-icons-png.flaticon.com/512/3112/3112944.png%22,
-        %22sizes%22: %22512x512%22,
-        %22type%22: %22image/png%22
-      }
-    ]
-  }">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg-color: #0d0d0d;
@@ -146,7 +132,7 @@
       text-align: left;
     }
 
-    /* Modal personalizado ultra clean */
+    /* Modal personalizado */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -245,7 +231,6 @@
 
   <button class="btn reset" onclick="confirmResetCurrent()" style="background: transparent; border: 1px dashed var(--card-border);">Reiniciar Contador Actual</button>
 
-  <!-- Modal Personalizado -->
   <div id="customModal" class="modal-overlay">
     <div class="modal-box">
       <div id="modalText" class="modal-text">¿Estás seguro?</div>
@@ -258,60 +243,26 @@
 
   <script>
     let w = 0, l = 0, pts = 0, streak = 0;
+    window.onload = function() { loadHistory(); };
 
-    window.onload = function() {
-      loadHistory();
-    };
-
-    function addWin() { 
-      w++; 
-      streak = (streak > 0) ? streak + 1 : 1; 
-      update(); 
-    }
-
-    function addLoss() { 
-      l++; 
-      streak = (streak < 0) ? streak - 1 : -1; 
-      update(); 
-    }
-
-    function addPoints() { 
-      let val = parseInt(document.getElementById('customPoints').value) || 0;
-      pts += val; 
-      update(); 
-    }
-
-    function subPoints() { 
-      let val = parseInt(document.getElementById('customPoints').value) || 0;
-      pts -= val; 
-      update(); 
-    }
+    function addWin() { w++; streak = (streak > 0) ? streak + 1 : 1; update(); }
+    function addLoss() { l++; streak = (streak < 0) ? streak - 1 : -1; update(); }
+    function addPoints() { let val = parseInt(document.getElementById('customPoints').value) || 0; pts += val; update(); }
+    function subPoints() { let val = parseInt(document.getElementById('customPoints').value) || 0; pts -= val; update(); }
 
     function showModal(text, onConfirm) {
       document.getElementById('modalText').innerText = text;
       let confirmBtn = document.getElementById('modalConfirmBtn');
-      confirmBtn.onclick = function() {
-        onConfirm();
-        closeModal();
-      };
+      confirmBtn.onclick = function() { onConfirm(); closeModal(); };
       document.getElementById('customModal').style.display = 'flex';
     }
 
-    function closeModal() {
-      document.getElementById('customModal').style.display = 'none';
-    }
-
-    function confirmResetCurrent() {
-      showModal("¿Querés reiniciar los números de la sesión actual?", function() {
-        w = 0; l = 0; pts = 0; streak = 0; 
-        update();
-      });
-    }
+    function closeModal() { document.getElementById('customModal').style.display = 'none'; }
+    function confirmResetCurrent() { showModal("¿Querés reiniciar los números de la sesión actual?", function() { w = 0; l = 0; pts = 0; streak = 0; update(); }); }
 
     function update() {
       document.getElementById('wins').innerText = w;
       document.getElementById('losses').innerText = l;
-      
       let total = w + l;
       let wr = total > 0 ? Math.round((w / total) * 100) : 0;
       document.getElementById('winrate').innerText = wr + "%";
@@ -335,26 +286,14 @@
 
     function saveSession() {
       let total = w + l;
-      if (total === 0 && pts === 0) {
-        return;
-      }
-
+      if (total === 0 && pts === 0) return;
       let now = new Date();
       let fecha = now.toLocaleDateString() + " " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       let wr = total > 0 ? Math.round((w / total) * 100) : 0;
-
-      let sessionData = {
-        fecha: fecha,
-        wins: w,
-        losses: l,
-        winrate: wr,
-        points: pts
-      };
-
+      let sessionData = { fecha: fecha, wins: w, losses: l, winrate: wr, points: pts };
       let history = JSON.parse(localStorage.getItem('brawl_history') || '[]');
       history.unshift(sessionData);
       localStorage.setItem('brawl_history', JSON.stringify(history));
-
       w = 0; l = 0; pts = 0; streak = 0;
       update();
       loadHistory();
@@ -363,12 +302,10 @@
     function loadHistory() {
       let history = JSON.parse(localStorage.getItem('brawl_history') || '[]');
       let listDiv = document.getElementById('historyList');
-
       if (history.length === 0) {
         listDiv.innerHTML = "No hay sesiones guardadas todavía.";
         return;
       }
-
       let html = "";
       history.forEach(s => {
         let ptsText = (s.points > 0 ? "+" : "") + s.points;
