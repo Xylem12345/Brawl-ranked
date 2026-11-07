@@ -8,9 +8,9 @@
   "description": "Contador de partidas y puntos de Ranked para Brawl Stars",
   "icons": [
     {
-      "src": "1794080929234.jpg",
+      "src": "Logo.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }
