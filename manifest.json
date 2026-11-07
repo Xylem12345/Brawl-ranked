@@ -5,13 +5,12 @@
   "display": "standalone",
   "background_color": "#0d0d0d",
   "theme_color": "#0d0d0d",
+  "description": "Contador de partidas y puntos de Ranked para Brawl Stars",
   "icons": [
     {
       "src": "1794080929234.jpg",
       "sizes": "512x512",
       "type": "image/jpeg"
-    }
-
     }
   ]
 }
