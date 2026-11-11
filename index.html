@@ -5,20 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brawl Stars Ranked Tracker</title>
     
-    <!-- Manifest incrustado para modo pantalla completa nativa -->
-    <link rel="manifest" href='data:application/manifest+json,{
-        "name": "Brawl Stars Ranked Tracker",
-        "short_name": "Ranked Tracker",
-        "start_url": "./index.html",
-        "display": "fullscreen",
-        "background_color": "#121212",
-        "theme_color": "#121212",
-        "icons": [{
-            "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23121212%22/><text y=%22.9em%22 font-size=%2280%22 x=%2210%22>🏆</text></svg>",
-            "sizes": "192x192 512x512",
-            "type": "image/svg+xml"
-        }]
-    }'>
+    <!-- Enlace al archivo manifest.json físico -->
+    <link rel="manifest" href="./manifest.json">
 
     <style>
         * {
@@ -77,7 +65,6 @@
             margin-bottom: 12px;
         }
 
-        /* Sesión Actual */
         .score-display {
             font-size: 2.2rem;
             font-weight: 900;
@@ -132,7 +119,6 @@
             border: 1px solid #612220;
         }
 
-        /* Puntos de Ranked */
         .ranked-points {
             font-size: 2rem;
             font-weight: 900;
@@ -179,7 +165,6 @@
             box-shadow: 0 4px 10px rgba(88, 86, 214, 0.3);
         }
 
-        /* Historial */
         .history-list {
             width: 100%;
             display: flex;
@@ -221,7 +206,6 @@
     <div class="container">
         <h1>Brawl Stars Ranked Tracker</h1>
 
-        <!-- Sesión Actual -->
         <div class="card">
             <div class="card-title">SESIÓN ACTUAL</div>
             <div class="score-display">
@@ -237,7 +221,6 @@
             </div>
         </div>
 
-        <!-- Puntos de Ranked -->
         <div class="card">
             <div class="card-title">PUNTOS DE RANKED</div>
             <div class="ranked-points" id="total-points">0</div>
@@ -251,7 +234,6 @@
             <button class="btn-save" onclick="saveSession()">🏁 Finalizar y Guardar Sesión</button>
         </div>
 
-        <!-- Historial de Sesiones -->
         <div class="card">
             <div class="card-title">HISTORIAL DE SESIONES</div>
             <div id="history-container" class="history-list">
@@ -262,28 +244,16 @@
     </div>
 
     <script>
-        let state = {
-            wins: 0,
-            losses: 0,
-            streak: 0,
-            points: 0,
-            history: []
-        };
+        let state = { wins: 0, losses: 0, streak: 0, points: 0, history: [] };
 
-        // Cargar datos al iniciar
         function loadData() {
             const saved = localStorage.getItem('bs_ranked_state_v2');
             if (saved) {
-                try {
-                    state = JSON.parse(saved);
-                } catch (e) {
-                    console.error("Error al cargar datos", e);
-                }
+                try { state = JSON.parse(saved); } catch (e) { console.error(e); }
             }
             updateUI();
         }
 
-        // Guardar instantáneamente en CADA cambio
         function saveData() {
             localStorage.setItem('bs_ranked_state_v2', JSON.stringify(state));
         }
@@ -291,25 +261,22 @@
         function addWin() {
             state.wins++;
             state.streak = state.streak > 0 ? state.streak + 1 : 1;
-            saveData(); // Se guarda al instante
+            saveData();
             updateUI();
         }
 
         function addLoss() {
             state.losses++;
             state.streak = state.streak < 0 ? state.streak - 1 : -1;
-            saveData(); // Se guarda al instante
+            saveData();
             updateUI();
         }
 
         function adjustPoints(isAdd) {
             const val = parseInt(document.getElementById('pts-input').value) || 0;
-            if (isAdd) {
-                state.points += val;
-            } else {
-                state.points = Math.max(0, state.points - val);
-            }
-            saveData(); // Se guarda al instante
+            if (isAdd) { state.points += val; } 
+            else { state.points = Math.max(0, state.points - val); }
+            saveData();
             updateUI();
         }
 
@@ -320,11 +287,10 @@
             }
             const sessionSummary = `${state.wins}W - ${state.losses}L (${state.points >= 0 ? '+' : ''}${state.points} pts)`;
             state.history.unshift(sessionSummary);
-            
             state.wins = 0;
             state.losses = 0;
             state.streak = 0;
-            saveData(); // Se guarda al instante
+            saveData();
             updateUI();
         }
 
@@ -360,7 +326,6 @@
             }
         }
 
-        // Cargar al abrir la página
         loadData();
     </script>
 </body>
