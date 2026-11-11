@@ -1,8 +1,9 @@
 {
   "name": "Brawl Stars Ranked Tracker",
   "short_name": "Ranked Tracker",
+  "description": "Tracker de partidas de Ranked para Brawl Stars",
   "start_url": "./index.html",
-  "display": "fullscreen",
+  "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
