@@ -1,390 +1,378 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Brawl Stars Ranked Tracker</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Orbitron & Rajdhani -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:ital,wght@0,600;0,800;0,900;1,800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Manifest dinámico para convertir en App Standalone sin barra arriba -->
-    <link rel="manifest" id="manifest-link">
+    
+    <!-- Manifest incrustado para modo pantalla completa nativa -->
+    <link rel="manifest" href='data:application/manifest+json,{
+        "name": "Brawl Stars Ranked Tracker",
+        "short_name": "Ranked Tracker",
+        "start_url": "./index.html",
+        "display": "fullscreen",
+        "background_color": "#121212",
+        "theme_color": "#121212",
+        "icons": [{
+            "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23121212%22/><text y=%22.9em%22 font-size=%2280%22 x=%2210%22>🏆</text></svg>",
+            "sizes": "192x192 512x512",
+            "type": "image/svg+xml"
+        }]
+    }'>
 
     <style>
-        body {
-            background-color: #0b0c0e;
-            color: #f1f5f9;
-            font-family: 'Rajdhani', sans-serif;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: manipulation;
         }
 
-        .font-orbitron {
-            font-family: 'Orbitron', sans-serif;
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            min-height: 100vh;
         }
 
-        /* Tarjetas Oscuras estilo Brawl Stars */
-        .bs-card {
-            background-color: #17181c;
-            border: 1px solid #262930;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        /* Colores exactos de los botones según captura */
-        .btn-green-bs {
-            background: linear-gradient(180deg, #164e32 0%, #0d311f 100%);
-            border: 1px solid #22c55e44;
-            color: #4ade80;
-        }
-        .btn-green-bs:active {
-            background: #15803d;
-            transform: scale(0.98);
-        }
-
-        .btn-red-bs {
-            background: linear-gradient(180deg, #4c1d24 0%, #2e1015 100%);
-            border: 1px solid #ef444444;
-            color: #f87171;
-        }
-        .btn-red-bs:active {
-            background: #b91c1c;
-            transform: scale(0.98);
+        h1 {
+            text-align: center;
+            font-size: 1.25rem;
+            font-style: italic;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            color: #f0f0f0;
         }
 
-        .btn-blue-bs {
-            background: linear-gradient(180deg, #133c55 0%, #0c2637 100%);
-            border: 1px solid #38bdf844;
-            color: #38bdf8;
-        }
-        .btn-blue-bs:active {
-            background: #0284c7;
-            transform: scale(0.98);
-        }
-
-        .btn-orange-bs {
-            background: linear-gradient(180deg, #4a2717 0%, #2f170c 100%);
-            border: 1px solid #fb923c44;
-            color: #fb923c;
-        }
-        .btn-orange-bs:active {
-            background: #c2410c;
-            transform: scale(0.98);
+        .card {
+            background-color: #1c1c1e;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 1px solid #2c2c2e;
         }
 
-        .btn-purple-bs {
-            background: linear-gradient(180deg, #7e22ce 0%, #6b21a8 100%);
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        .card-title {
+            font-size: 0.75rem;
+            color: #8e8e93;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
-        .btn-purple-bs:active {
-            background: #9333ea;
-            transform: scale(0.98);
+
+        /* Sesión Actual */
+        .score-display {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+
+        .wins { color: #34c759; }
+        .losses { color: #ff3b30; }
+        .dash { color: #8e8e93; margin: 0 4px; }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            font-size: 0.85rem;
+            color: #aeaeb2;
+            margin-bottom: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.1s active;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .btn-win {
+            background-color: #103419;
+            color: #34c759;
+            border: 1px solid #245c30;
+        }
+
+        .btn-loss {
+            background-color: #3a1312;
+            color: #ff3b30;
+            border: 1px solid #612220;
+        }
+
+        /* Puntos de Ranked */
+        .ranked-points {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        .points-input-container {
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        .points-input {
+            width: 100%;
+            background-color: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            outline: none;
+            font-family: monospace;
+        }
+
+        .btn-add-pts {
+            background-color: #003b46;
+            color: #00b4d8;
+            border: 1px solid #00647d;
+        }
+
+        .btn-sub-pts {
+            background-color: #4a2810;
+            color: #f77f00;
+            border: 1px solid #7d4618;
+        }
+
+        .btn-save {
+            width: 100%;
+            background-color: #5856d6;
+            color: #ffffff;
+            margin-top: 4px;
+            box-shadow: 0 4px 10px rgba(88, 86, 214, 0.3);
+        }
+
+        /* Historial */
+        .history-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background-color: #2c2c2e;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            color: #d1d1d6;
+        }
+
+        .empty-history {
+            color: #636366;
+            font-size: 0.8rem;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: #8e8e93;
+            font-size: 0.75rem;
+            padding: 6px;
+            margin-top: 4px;
+            border: 1px solid #3a3a3c;
         }
     </style>
 </head>
-<body class="min-h-screen p-4 max-w-md mx-auto flex flex-col justify-start pb-8">
+<body>
 
-    <!-- Título Principal -->
-    <header class="text-center my-4">
-        <h1 class="font-orbitron italic font-black text-2xl tracking-wider text-slate-100">
-            Brawl Stars Ranked Tracker
-        </h1>
-    </header>
+    <div class="container">
+        <h1>Brawl Stars Ranked Tracker</h1>
 
-    <main class="space-y-4">
-
-        <!-- TARJETA 1: SESIÓN ACTUAL -->
-        <section class="bs-card rounded-2xl p-5 text-center relative overflow-hidden">
-            <h2 class="text-xs font-bold font-orbitron tracking-widest text-slate-400 uppercase mb-3">
-                SESIÓN ACTUAL
-            </h2>
-
-            <!-- Marcador W - L -->
-            <div class="flex justify-center items-center gap-3 font-orbitron italic font-black text-4xl mb-4">
-                <span id="wins-display" class="text-emerald-400">0W</span>
-                <span class="text-slate-500">—</span>
-                <span id="losses-display" class="text-red-500">0L</span>
+        <!-- Sesión Actual -->
+        <div class="card">
+            <div class="card-title">SESIÓN ACTUAL</div>
+            <div class="score-display">
+                <span id="wins-count" class="wins">0W</span><span class="dash">-</span><span id="losses-count" class="losses">0L</span>
             </div>
-
-            <!-- Stats Secundarias -->
-            <div class="flex justify-center items-center gap-6 text-sm text-slate-300 mb-5 font-semibold">
-                <div>
-                    <span class="text-slate-400">Winrate:</span> 
-                    <span id="winrate-display" class="font-orbitron text-slate-100">0%</span>
-                </div>
-                <div>
-                    <span class="text-slate-400">Racha:</span> 
-                    <span id="streak-display" class="font-orbitron text-slate-100">0</span>
-                </div>
+            <div class="stats-row">
+                <span id="winrate-text">Winrate: 0%</span>
+                <span id="streak-text">Racha: 0</span>
             </div>
-
-            <!-- Botones +1 Victoria / +1 Derrota -->
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="addWin()" class="btn-green-bs font-orbitron font-bold py-3.5 px-2 rounded-xl text-base italic transition flex items-center justify-center">
-                    +1 Victoria
-                </button>
-                <button onclick="addLoss()" class="btn-red-bs font-orbitron font-bold py-3.5 px-2 rounded-xl text-base italic transition flex items-center justify-center">
-                    +1 Derrota
-                </button>
+            <div class="btn-group">
+                <button class="btn-win" onclick="addWin()">+1 Victoria</button>
+                <button class="btn-loss" onclick="addLoss()">+1 Derrota</button>
             </div>
-        </section>
+        </div>
 
-
-        <!-- TARJETA 2: PUNTOS DE RANKED -->
-        <section class="bs-card rounded-2xl p-5 text-center">
-            <h2 class="text-xs font-bold font-orbitron tracking-widest text-slate-400 uppercase mb-3">
-                PUNTOS DE RANKED
-            </h2>
-
-            <!-- Visualizador de Puntos -->
-            <div id="ranked-points" class="font-orbitron italic font-black text-4xl text-slate-100 my-2">
-                0
+        <!-- Puntos de Ranked -->
+        <div class="card">
+            <div class="card-title">PUNTOS DE RANKED</div>
+            <div class="ranked-points" id="total-points">0</div>
+            <div class="points-input-container">
+                <input type="number" id="pts-input" class="points-input" value="100">
             </div>
-
-            <!-- Input / Modificador de Paso -->
-            <div class="mb-4">
-                <input type="number" id="step-input" value="100" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl py-2 px-4 text-center font-orbitron font-bold text-slate-200 focus:outline-none focus:border-cyan-500" placeholder="Puntos por partida">
+            <div class="btn-group">
+                <button class="btn-add-pts" onclick="adjustPoints(true)">+ Puntos</button>
+                <button class="btn-sub-pts" onclick="adjustPoints(false)">- Puntos</button>
             </div>
+            <button class="btn-save" onclick="saveSession()">🏁 Finalizar y Guardar Sesión</button>
+        </div>
 
-            <!-- Botones de Sumar / Restar Puntos -->
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="addPoints()" class="btn-blue-bs font-orbitron font-bold py-3 px-2 rounded-xl text-sm italic transition">
-                    + Puntos
-                </button>
-                <button onclick="subtractPoints()" class="btn-orange-bs font-orbitron font-bold py-3 px-2 rounded-xl text-sm italic transition">
-                    - Puntos
-                </button>
+        <!-- Historial de Sesiones -->
+        <div class="card">
+            <div class="card-title">HISTORIAL DE SESIONES</div>
+            <div id="history-container" class="history-list">
+                <div class="empty-history">No hay sesiones guardadas todavía.</div>
             </div>
-
-            <!-- Botón Guardar Sesión -->
-            <button onclick="finishSession()" class="btn-purple-bs w-full font-orbitron font-bold py-3.5 px-4 rounded-xl text-slate-100 italic transition flex items-center justify-center gap-2">
-                🏁 Finalizar y Guardar Sesión
-            </button>
-        </section>
-
-
-        <!-- TARJETA 3: HISTORIAL DE SESIONES -->
-        <section class="bs-card rounded-2xl p-5">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xs font-bold font-orbitron tracking-widest text-slate-400 uppercase">
-                    HISTORIAL DE SESIONES
-                </h2>
-                <button id="clear-history-btn" onclick="clearHistory()" class="text-xs text-red-400 hover:text-red-300 hidden font-bold">
-                    Borrar Historial
-                </button>
-            </div>
-
-            <div id="history-container" class="space-y-2">
-                <p class="text-center text-slate-400 italic text-sm py-4 font-semibold">
-                    No hay sesiones guardadas todavía.
-                </p>
-            </div>
-        </section>
-
-    </main>
+            <button class="btn-reset" onclick="resetAllData()">Reiniciar Datos</button>
+        </div>
+    </div>
 
     <script>
-        // Claves de Almacenamiento Persistente Local
-        const STORAGE_CURRENT = 'BRAWL_STARS_CURRENT_SESSION_V2';
-        const STORAGE_HISTORY = 'BRAWL_STARS_HISTORY_V2';
-
-        // Estado inicial de la sesión
-        let currentSession = {
+        // Estado de la app
+        let state = {
             wins: 0,
             losses: 0,
             streak: 0,
-            points: 0
+            points: 0,
+            history: []
         };
 
-        let history = [];
-
-        // Referencias a elementos del DOM
-        const winsEl = document.getElementById('wins-display');
-        const lossesEl = document.getElementById('losses-display');
-        const winrateEl = document.getElementById('winrate-display');
-        const streakEl = document.getElementById('streak-display');
-        const pointsEl = document.getElementById('ranked-points');
-        const stepInput = document.getElementById('step-input');
-        const historyContainer = document.getElementById('history-container');
-        const clearHistoryBtn = document.getElementById('clear-history-btn');
-
-        // Configuración para permitir que la app sea instalable como App nativa (sin barra de navegador)
-        function initPWA() {
-            const manifestObj = {
-                name: "Brawl Stars Ranked Tracker",
-                short_name: "Ranked Tracker",
-                start_url: "./",
-                display: "standalone",
-                background_color: "#0b0c0e",
-                theme_color: "#0b0c0e",
-                icons: [{
-                    src: "https://placehold.co/192x192/0b0c0e/4ade80?text=BS+Ranked",
-                    sizes: "192x192",
-                    type: "image/png"
-                }]
-            };
-            const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
-            document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
-
-            // Inyectar Service Worker en linea para habilitar PWA en GitHub Pages
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    self.addEventListener('install', e => self.skipWaiting());
-                    self.addEventListener('activate', e => self.clients.claim());
-                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-                `;
-                const swBlob = new Blob([swCode], { type: 'text/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
-            }
-        }
-
-        // Cargar Datos Guardados de la Memoria del Celular
+        // Cargar datos guardados al iniciar
         function loadData() {
-            try {
-                const savedCurrent = localStorage.getItem(STORAGE_CURRENT);
-                if (savedCurrent) {
-                    currentSession = JSON.parse(savedCurrent);
+            const saved = localStorage.getItem('bs_ranked_state');
+            if (saved) {
+                try {
+                    state = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Error al cargar datos", e);
                 }
-                const savedHistory = localStorage.getItem(STORAGE_HISTORY);
-                if (savedHistory) {
-                    history = JSON.parse(savedHistory);
-                }
-            } catch (e) {
-                console.error("Error al cargar localStorage:", e);
             }
             updateUI();
-            renderHistory();
         }
 
-        // Guardar Datos Inmediatamente en la Memoria del Celular
+        // Guardar datos en localStorage (Automático)
         function saveData() {
-            try {
-                localStorage.setItem(STORAGE_CURRENT, JSON.stringify(currentSession));
-                localStorage.setItem(STORAGE_HISTORY, JSON.stringify(history));
-            } catch (e) {
-                console.error("Error al guardar localStorage:", e);
-            }
+            localStorage.setItem('bs_ranked_state', JSON.stringify(state));
         }
 
-        // Actualización de la Interfaz
-        function updateUI() {
-            winsEl.textContent = `${currentSession.wins}W`;
-            lossesEl.textContent = `${currentSession.losses}L`;
-
-            const total = currentSession.wins + currentSession.losses;
-            const winrate = total > 0 ? Math.round((currentSession.wins / total) * 100) : 0;
-            winrateEl.textContent = `${winrate}%`;
-            streakEl.textContent = currentSession.streak;
-
-            pointsEl.textContent = currentSession.points;
-        }
-
-        // Acciones de Marcador
         function addWin() {
-            currentSession.wins++;
-            currentSession.streak = currentSession.streak < 0 ? 1 : currentSession.streak + 1;
+            state.wins++;
+            state.streak = state.streak > 0 ? state.streak + 1 : 1;
             saveData();
             updateUI();
         }
 
         function addLoss() {
-            currentSession.losses++;
-            currentSession.streak = currentSession.streak > 0 ? -1 : currentSession.streak - 1;
+            state.losses++;
+            state.streak = state.streak < 0 ? state.streak - 1 : -1;
             saveData();
             updateUI();
         }
 
-        function getStep() {
-            const val = parseInt(stepInput.value, 10);
-            return isNaN(val) ? 100 : val;
-        }
-
-        function addPoints() {
-            currentSession.points += getStep();
+        function adjustPoints(isAdd) {
+            const val = parseInt(document.getElementById('pts-input').value) || 0;
+            if (isAdd) {
+                state.points += val;
+            } else {
+                state.points = Math.max(0, state.points - val);
+            }
             saveData();
             updateUI();
         }
 
-        function subtractPoints() {
-            currentSession.points -= getStep();
-            saveData();
-            updateUI();
-        }
-
-        // Guardar Sesión Actual en el Historial
-        function finishSession() {
-            if (currentSession.wins === 0 && currentSession.losses === 0 && currentSession.points === 0) return;
-
-            const sessionRecord = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
-                wins: currentSession.wins,
-                losses: currentSession.losses,
-                points: currentSession.points
-            };
-
-            history.unshift(sessionRecord);
-            
-            // Reiniciar sesión activa
-            currentSession = { wins: 0, losses: 0, streak: 0, points: 0 };
-            
-            saveData();
-            updateUI();
-            renderHistory();
-        }
-
-        // Renderizar Lista de Historial
-        function renderHistory() {
-            if (history.length === 0) {
-                historyContainer.innerHTML = `
-                    <p class="text-center text-slate-400 italic text-sm py-4 font-semibold">
-                        No hay sesiones guardadas todavía.
-                    </p>
-                `;
-                clearHistoryBtn.classList.add('hidden');
+        function saveSession() {
+            if (state.wins === 0 && state.losses === 0) {
+                alert("No hay partidas jugadas en esta sesión para guardar.");
                 return;
             }
-
-            clearHistoryBtn.classList.remove('hidden');
-            historyContainer.innerHTML = history.map(item => `
-                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex justify-between items-center text-sm">
-                    <div>
-                        <div class="font-orbitron font-bold text-slate-200">
-                            <span class="text-emerald-400">${item.wins}W</span> — <span class="text-red-400">${item.losses}L</span>
-                        </div>
-                        <div class="text-xs text-slate-500">${item.date}</div>
-                    </div>
-                    <div class="font-orbitron font-black text-base ${item.points >= 0 ? 'text-cyan-400' : 'text-orange-400'}">
-                        ${item.points >= 0 ? '+' + item.points : item.points} Pts
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function clearHistory() {
-            history = [];
+            const sessionSummary = `${state.wins}W - ${state.losses}L (${state.points >= 0 ? '+' : ''}${state.points} pts)`;
+            state.history.unshift(sessionSummary);
+            
+            // Resetear sesión actual pero mantener historial y puntos
+            state.wins = 0;
+            state.losses = 0;
+            state.streak = 0;
             saveData();
-            renderHistory();
+            updateUI();
         }
 
-        // Eventos clave para autosalvado en segundo plano / pantalla apagada
-        window.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') saveData();
-        });
-        window.addEventListener('pagehide', saveData);
-        window.addEventListener('beforeunload', saveData);
+        function resetAllData() {
+            if (confirm("¿Estás seguro de querer borrar todo?")) {
+                localStorage.removeItem('bs_ranked_state');
+                state = { wins: 0, losses: 0, streak: 0, points: 0, history: [] };
+                updateUI();
+            }
+        }
 
-        // Al cargar la pantalla
-        window.onload = function() {
-            initPWA();
-            loadData();
-        };
+        function updateUI() {
+            document.getElementById('wins-count').innerText = state.wins + 'W';
+            document.getElementById('losses-count').innerText = state.losses + 'L';
+            
+            const totalGames = state.wins + state.losses;
+            const winrate = totalGames > 0 ? Math.round((state.wins / totalGames) * 100) : 0;
+            document.getElementById('winrate-text').innerText = `Winrate: ${winrate}%`;
+            document.getElementById('streak-text').innerText = `Racha: ${state.streak}`;
+            document.getElementById('total-points').innerText = state.points;
+
+            // Renderizar Historial
+            const histContainer = document.getElementById('history-container');
+            if (state.history.length === 0) {
+                histContainer.innerHTML = '<div class="empty-history">No hay sesiones guardadas todavía.</div>';
+            } else {
+                histContainer.innerHTML = '';
+                state.history.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `<span>Sesión #${state.history.length - idx}</span> <b>${item}</b>`;
+                    histContainer.appendChild(div);
+                });
+            }
+        }
+
+        // Guardar automáticamente cuando se apaga la pantalla, se cambia de app o se cierra
+        window.addEventListener('pagehide', saveData);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveData();
+            }
+        });
+
+        // Inicializar
+        loadData();
     </script>
 </body>
 </html>
-```
