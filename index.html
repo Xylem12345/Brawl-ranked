@@ -262,7 +262,6 @@
     </div>
 
     <script>
-        // Estado de la app
         let state = {
             wins: 0,
             losses: 0,
@@ -271,9 +270,9 @@
             history: []
         };
 
-        // Cargar datos guardados al iniciar
+        // Cargar datos al iniciar
         function loadData() {
-            const saved = localStorage.getItem('bs_ranked_state');
+            const saved = localStorage.getItem('bs_ranked_state_v2');
             if (saved) {
                 try {
                     state = JSON.parse(saved);
@@ -284,22 +283,22 @@
             updateUI();
         }
 
-        // Guardar datos en localStorage (Automático)
+        // Guardar instantáneamente en CADA cambio
         function saveData() {
-            localStorage.setItem('bs_ranked_state', JSON.stringify(state));
+            localStorage.setItem('bs_ranked_state_v2', JSON.stringify(state));
         }
 
         function addWin() {
             state.wins++;
             state.streak = state.streak > 0 ? state.streak + 1 : 1;
-            saveData();
+            saveData(); // Se guarda al instante
             updateUI();
         }
 
         function addLoss() {
             state.losses++;
             state.streak = state.streak < 0 ? state.streak - 1 : -1;
-            saveData();
+            saveData(); // Se guarda al instante
             updateUI();
         }
 
@@ -310,7 +309,7 @@
             } else {
                 state.points = Math.max(0, state.points - val);
             }
-            saveData();
+            saveData(); // Se guarda al instante
             updateUI();
         }
 
@@ -322,17 +321,16 @@
             const sessionSummary = `${state.wins}W - ${state.losses}L (${state.points >= 0 ? '+' : ''}${state.points} pts)`;
             state.history.unshift(sessionSummary);
             
-            // Resetear sesión actual pero mantener historial y puntos
             state.wins = 0;
             state.losses = 0;
             state.streak = 0;
-            saveData();
+            saveData(); // Se guarda al instante
             updateUI();
         }
 
         function resetAllData() {
             if (confirm("¿Estás seguro de querer borrar todo?")) {
-                localStorage.removeItem('bs_ranked_state');
+                localStorage.removeItem('bs_ranked_state_v2');
                 state = { wins: 0, losses: 0, streak: 0, points: 0, history: [] };
                 updateUI();
             }
@@ -348,7 +346,6 @@
             document.getElementById('streak-text').innerText = `Racha: ${state.streak}`;
             document.getElementById('total-points').innerText = state.points;
 
-            // Renderizar Historial
             const histContainer = document.getElementById('history-container');
             if (state.history.length === 0) {
                 histContainer.innerHTML = '<div class="empty-history">No hay sesiones guardadas todavía.</div>';
@@ -363,15 +360,7 @@
             }
         }
 
-        // Guardar automáticamente cuando se apaga la pantalla, se cambia de app o se cierra
-        window.addEventListener('pagehide', saveData);
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                saveData();
-            }
-        });
-
-        // Inicializar
+        // Cargar al abrir la página
         loadData();
     </script>
 </body>
